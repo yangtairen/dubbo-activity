@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">     
+	<dubbo:application name="provider-test" />
+	   
+    <dubbo:registry  protocol="zookeeper"  address="172.17.3.136:2181"  />
+   	<dubbo:protocol name="dubbo" port="20880" /> 
+   	
+   	<!-- 提供普通服务 -->  
+	<dubbo:service interface="com.mor.server.dubbo.service.DemoServer"
+		ref="demoService" />       
+	<!-- 和本地bean一样实现服务 -->
+	<bean id="demoService" class="com.mor.server.dubbo.service.DemoServerImpl" />
+	
+	<!-- 提供回调服务 -->
+	<bean id="callbackService" class="com.mor.server.dubbo.callback.CallbackServiceImpl" />
+	<dubbo:service interface="com.mor.server.dubbo.callback.CallbackService" ref="callbackService" connections="1" callbacks="1000">
+		<!-- 服务端中包含回调客户端的方法 -->
+	    <dubbo:method name="addListener">
+	        <!-- <dubbo:argument index="1" callback="true" /> -->
+	        <!--也可以通过指定类型的方式-->
+	        <dubbo:argument type="com.mor.server.dubbo.callback.CallbackListener" callback="true" />
+	    </dubbo:method>
+	</dubbo:service>
+</beans>
